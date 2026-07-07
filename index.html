@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星合 -ほしあわせ- | 88星座パズルゲーム</title>
+<meta name="description" content="実在のIAU星座境界データと本物の恒星カタログを使った、ブラウザで無料で遊べる3D天球ジグソーパズル「星合 -ほしあわせ-」。星座の領域ピースを本来の位置にはめ込んで、夜空を完成させよう。">
+<style>
+  :root{
+    --night:#04060f; --star-gold:#ffd98a; --emerald:#6ee6be;
+    --panel:rgba(8,14,32,.85); --line:rgba(143,208,255,.22);
+    --serif:"Hiragino Mincho ProN","Yu Mincho","YuMincho",serif;
+    --sans:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--night);color:#e8ecf5;font-family:var(--sans);line-height:1.85}
+  body::before{content:'';position:fixed;inset:0;z-index:-1;
+    background:radial-gradient(1px 1px at 20% 30%,#fff,transparent),
+      radial-gradient(1px 1px at 70% 60%,#fff,transparent),
+      radial-gradient(1px 1px at 40% 80%,#fff,transparent),
+      radial-gradient(2px 2px at 85% 20%,#ffe9b0,transparent),
+      radial-gradient(1px 1px at 10% 90%,#fff,transparent);
+    background-size:100% 100%;opacity:.5}
+  .wrap{max-width:720px;margin:0 auto;padding:48px 20px 80px}
+  h1{font-family:var(--serif);font-size:38px;letter-spacing:.28em;color:var(--star-gold);
+    text-shadow:0 0 24px rgba(255,217,138,.35);font-weight:500;text-align:center}
+  .sub{font-family:var(--serif);text-align:center;letter-spacing:.3em;font-size:13px;opacity:.75;margin:8px 0 40px}
+  .cta{display:block;text-align:center;margin:32px 0 44px}
+  .btn{display:inline-block;background:linear-gradient(180deg,#2a3d6e,#182550);border:1px solid var(--star-gold);
+    color:#fff;border-radius:999px;padding:16px 46px;font-size:17px;letter-spacing:.2em;text-decoration:none}
+  .btn:active{transform:scale(.97)}
+  section{margin-bottom:38px}
+  h2{font-family:var(--serif);color:var(--emerald);font-size:19px;letter-spacing:.1em;margin-bottom:14px;
+    border-left:3px solid var(--emerald);padding-left:12px}
+  p{font-size:14.5px;opacity:.9;margin-bottom:10px}
+  ul{margin:10px 0 10px 1.3em;font-size:14.5px;opacity:.9}
+  li{margin-bottom:6px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+  .card b{display:block;color:var(--star-gold);font-size:22px;margin-bottom:4px}
+  .card span{font-size:12px;opacity:.75}
+  footer{text-align:center;font-size:12.5px;opacity:.55;margin-top:60px;padding-top:20px;border-top:1px solid var(--line)}
+  footer a{color:#9fc4ff;text-decoration:none;margin:0 8px}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>星合</h1>
+  <div class="sub">ほしあわせ ── 88星座パズル</div>
+
+  <p>まだ何もない、ほの暗い天球のまんなかにあなたは立っています。88星座の「領域ピース」を本来の場所へはめこむたび、その一角に星々が灯り、やがて全天の夜空が完成していく——そんなブラウザ完結の3Dジグソーパズルです。</p>
+
+  <div class="cta"><a class="btn" href="game.html">今すぐ遊ぶ(無料)</a></div>
+
+  <section>
+    <h2>このゲームの特徴</h2>
+    <div class="cards">
+      <div class="card"><b>88</b><span>国際天文学連合(IAU)公式の星座境界データを使用</span></div>
+      <div class="card"><b>5,044</b><span>実在の恒星(6等星まで)を実座標・実色で再現</span></div>
+      <div class="card"><b>3</b><span>初級(黄道12星座)・中級(トレミー48星座)・上級(全88星座)</span></div>
+    </div>
+    <ul>
+      <li>ピースの形は球面上の見え方に忠実な正距方位図法で描画</li>
+      <li>境界ヒント・星座線・ピース内の星表示など、初心者にもやさしい難易度設定</li>
+      <li>クリアタイムの記録(上位3件・難易度別)と結果シェア機能</li>
+      <li>日本語 / English 切り替え対応</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>遊び方</h2>
+    <ul>
+      <li>画面下のピース一覧から星座を選び、天球の正しい位置へドラッグ、またはタップで選択して配置</li>
+      <li>指1本のドラッグで天球を回転、ピンチやホイールで拡大縮小</li>
+      <li>途中でも一時停止・中断でき、進行状況はブラウザに自動保存されます</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>データについて</h2>
+    <p>星座境界・恒星カタログ・星座線データは <a href="https://github.com/ofrohn/d3-celestial" style="color:#9fc4ff">d3-celestial</a>(BSD-3ライセンス)を加工して使用しています。</p>
+  </section>
+
+  <footer>
+    © 星合 -ほしあわせ-　
+    <a href="privacy.html">プライバシーポリシー</a>
+    <a href="contact.html">お問い合わせ</a>
+  </footer>
+</div>
+</body>
+</html>
