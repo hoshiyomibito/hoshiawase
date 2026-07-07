@@ -8,7 +8,7 @@
   :root{
     --night:#04060f; --star-gold:#ffd98a; --ui-blue:#8fd0ff; --emerald:#6ee6be;
     --ok:#a7e8b4; --ng:#ff9a9a;
-    --panel:rgba(8,14,32,.85); --line:rgba(143,208,255,.22);
+    --panel:rgba(8,14,32,.94); --line:rgba(143,208,255,.22);
     --serif:"Hiragino Mincho ProN","Yu Mincho","YuMincho",serif;
     --sans:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
   }
@@ -48,13 +48,36 @@
 
   /* ゲーム中の表示設定パネル */
   #hintPanel{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:12;
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;backdrop-filter:blur(6px)}
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
   #hintPanel label{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;cursor:pointer}
   #hintPanel input{accent-color:var(--star-gold);width:15px;height:15px}
   #pauseChip,#dispChip{cursor:pointer;font-size:12px}
   #viewPanel select{background:#0c1430;color:#dfe8ff;border:1px solid var(--line);border-radius:6px;
     padding:3px 6px;font-size:12px;margin-left:6px;font-family:var(--sans)}
   #pauseTime{font-size:34px;font-family:var(--serif);color:var(--star-gold);margin:10px 0 18px;font-variant-numeric:tabular-nums}
+
+  /* ---- 星座あてクイズ ---- */
+  #qzModeRow{display:flex;gap:8px;justify-content:center;margin:8px 0 6px}
+  #quizPlay{position:fixed;inset:0;z-index:15;background:rgba(4,6,15,.82);display:none;flex-direction:column}
+  #qzHud{text-align:center;padding:16px 56px 4px;position:relative}
+  #qzQ{font-family:var(--serif);font-size:24px;color:var(--star-gold);letter-spacing:.12em;
+    text-shadow:0 0 16px rgba(255,217,138,.35)}
+  #qzProg{font-size:12px;opacity:.7;margin-top:4px}
+  #qzQuitBtn{position:absolute;top:12px;right:12px;background:var(--panel);border:1px solid var(--line);
+    color:#cfe2ff;border-radius:999px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:var(--sans)}
+  #qzFeed{text-align:center;min-height:24px;font-size:15px;margin:4px 0;letter-spacing:.1em}
+  #qzFeed.ok{color:var(--ok)} #qzFeed.ng{color:var(--ng)}
+  #qzGrid4{flex:1;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center;
+    align-content:center;padding:10px;overflow:auto}
+  .qcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px;
+    cursor:pointer;transition:border-color .15s,box-shadow .15s;flex:0 0 auto}
+  .qcard:hover{border-color:rgba(255,217,138,.5)}
+  #qzGrid4 .qcard canvas{width:min(190px,40vw);height:min(132px,28vw);display:block}
+  .qcard.good{border-color:var(--ok);box-shadow:0 0 16px rgba(167,232,180,.5)}
+  .qcard.bad{border-color:var(--ng);animation:shk .35s}
+  .qcard.dim{opacity:.35;pointer-events:none}
+  #qzGrid4.ten .qcard canvas{width:min(128px,27vw);height:min(88px,19vw)}
+  #qzScore{font-size:42px;font-family:var(--serif);color:var(--star-gold);margin:8px 0}
 
   /* 配置時の星座名ポップ */
   #namePop{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:9;pointer-events:none;
@@ -63,7 +86,7 @@
 
   .hud{position:fixed;z-index:10;user-select:none}
   #hud-top{top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;pointer-events:none;gap:8px}
-  .chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 12px;backdrop-filter:blur(6px);pointer-events:auto}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 12px;pointer-events:auto}
   #timer{font-variant-numeric:tabular-nums;font-size:18px;letter-spacing:.05em}
   #timer small{font-size:10px;opacity:.6;display:block;letter-spacing:.08em}
   #midChips{display:flex;gap:8px;pointer-events:auto}
@@ -101,7 +124,7 @@
 
   /* 観賞モードパネル */
   #viewPanel{position:fixed;right:10px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:10;
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px 14px;display:none;min-width:176px;backdrop-filter:blur(6px)}
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px 14px;display:none;min-width:176px}
   #viewPanel h3{font-family:var(--serif);font-size:13px;color:var(--star-gold);letter-spacing:.2em;margin-bottom:7px}
   #viewPanel label{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:4px 0;cursor:pointer}
   #viewPanel input{accent-color:var(--star-gold);width:15px;height:15px}
@@ -109,7 +132,7 @@
     border-radius:8px;padding:6px;font-size:12px;cursor:pointer;font-family:var(--sans)}
 
   .overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(ellipse at 50% 60%,rgba(11,16,48,.55),rgba(4,6,15,.9));backdrop-filter:blur(3px)}
+    background:radial-gradient(ellipse at 50% 60%,rgba(11,16,48,.55),rgba(4,6,15,.9))}
   .card{max-width:540px;width:calc(100vw - 36px);text-align:center;padding:32px 24px;
     background:rgba(8,12,30,.75);border:1px solid var(--line);border-radius:20px;max-height:92vh;overflow-y:auto}
   .card h1{font-family:var(--serif);font-size:42px;letter-spacing:.3em;color:var(--star-gold);
@@ -204,6 +227,7 @@
     <button class="btn" id="startBtn"></button>
     <button class="btn" id="resumeBtn" style="display:none"></button>
     <button class="btn ghost" id="freeBtn"></button>
+    <button class="btn ghost" id="quizBtn"></button>
     <div class="howto" id="howtoText"></div>
     <div id="titleTop3"></div>
   </div>
@@ -230,6 +254,43 @@
     <button class="btn ghost" id="quitBtn"></button>
     <button class="btn ghost" id="quitNoSaveBtn"></button>
     <div class="howto" id="pauseNote"></div>
+  </div>
+</div>
+
+<div class="overlay" id="quizSetup" style="display:none">
+  <div class="card">
+    <h1 style="font-size:26px" id="qzTitle"></h1>
+    <p id="qzDesc"></p>
+    <div id="qzModeRow">
+      <button class="dbtn sel" id="qz4Btn" data-q="4"></button>
+      <button class="dbtn" id="qz10Btn" data-q="10"></button>
+    </div>
+    <br>
+    <button class="btn" id="qzStartBtn"></button>
+    <button class="btn ghost" id="qzCancelBtn"></button>
+    <div id="qzBestLine" class="howto"></div>
+  </div>
+</div>
+
+<div id="quizPlay">
+  <div id="qzHud">
+    <div id="qzQ"></div>
+    <div id="qzProg"></div>
+    <button id="qzQuitBtn"></button>
+  </div>
+  <div id="qzFeed"></div>
+  <div id="qzGrid4"></div>
+</div>
+
+<div class="overlay" id="quizResult" style="display:none">
+  <div class="card">
+    <h1 style="font-size:28px" id="qzResTitle"></h1>
+    <div id="qzScore"></div>
+    <div id="qzTimeLine" style="font-size:14px;opacity:.8;margin-bottom:6px"></div>
+    <div id="qzNewRec" style="color:var(--ok);letter-spacing:.2em;display:none;margin-bottom:8px"></div>
+    <div id="qzResBest" class="howto" style="margin-bottom:14px"></div>
+    <button class="btn" id="qzAgainBtn"></button>
+    <button class="btn ghost" id="qzBackBtn"></button>
   </div>
 </div>
 
@@ -308,8 +369,9 @@ ja:{
  pause:'一時停止', presume:'再開する', pquit:'セーブして中断', pquitns:'セーブせずタイトルへ',
  pnote:'「セーブして中断」なら配置と経過時間が保存され、<br>タイトルの「つづきから」で再開できます',
  clear:'全天完成', clearSub:'すべての星座が、あなたの空に還りました',
- newrec:'✦ 自己ベスト更新 ✦', viewsky:'星空を眺める', retry:'もう一度', share:'結果をシェア', copied:'✓ コピーしました',
+ newrec:'✦ 自己ベスト更新 ✦', viewsky:'星空を眺める', retry:'もう一度', share:'Xでシェア', copied:'✓ コピーしました',
  shareText:(c,t)=>`星座パズル『星合 -ほしあわせ-』${c}を ${t} でクリアしました!✦`,
+ shareSaved:'✓ 画像を保存しました。投稿画面に添付してね', shareImgAlt:'クリア画面の画像を保存',
  vp:'観賞モード', vLines:'星座線', vNames:'星座名', vStars:'有名な星の名前', vFill:'領域の彩り',
  fMulti:'星座ごとに変える', fMono:'すべて同じ色', fOff:'なし',
  vBounds:'星座の境界線', vMess:'メシエ天体', vAuto:'ゆっくり自動回転', back:'タイトルへ戻る',
@@ -321,6 +383,12 @@ ja:{
  left:'←左', right:'右→', up:'↑上', down:'↓下', isAt:(n,d)=>`(${n}は ${d})`,
  lit:n=>`✦ ${n} に星が灯った`,
  disp:'表示 ▾', pchip:'⏸ 一時停止',
+ quiz:'星座あてクイズ', qDesc:'出題された星座を、星の並び(星座線)から選ぼう。全10問。',
+ q4:'4択(かんたん)', q10:'10択(むずかしい)', qStart:'スタート',
+ qWhich:n=>`「${n}」はどれ?`, qProg:(i,n)=>`第 ${i} 問 / ${n}`,
+ qCorrect:'✦ 正解!', qWrong:n=>`✕ 正解は「${n}」でした`, qTryAgain:'✕ ちがう星座… もう一度',
+ qResult:'クイズ結果', qScore:(s,n)=>`${s} / ${n} 問正解`, qTime:t=>`タイム ${t}`,
+ qNew:'✦ ベスト更新 ✦', qBest:(s,t)=>`ベスト: ${s}問正解 (${t})`, qAgain:'もう一度', qQuit:'やめる',
 },
 en:{
  sub:'HOSHIAWASE ── Constellation Region Puzzle',
@@ -337,8 +405,9 @@ en:{
  pause:'Paused', presume:'Resume', pquit:'Save & Quit', pquitns:'Quit without saving',
  pnote:'"Save & Quit" keeps your progress and time —<br>use "Continue" on the title screen to resume',
  clear:'Sky Complete!', clearSub:'Every constellation has returned to your sky',
- newrec:'✦ New Record! ✦', viewsky:'View the sky', retry:'Play again', share:'Share result', copied:'✓ Copied',
+ newrec:'✦ New Record! ✦', viewsky:'View the sky', retry:'Play again', share:'Share on X', copied:'✓ Copied',
  shareText:(c,t)=>`I completed the constellation puzzle HOSHIAWASE (${c}) in ${t}! ✦`,
+ shareSaved:'✓ Image saved — attach it to your post', shareImgAlt:'Save clear-screen image',
  vp:'Viewing Mode', vLines:'Constellation lines', vNames:'Constellation names', vStars:'Famous star names', vFill:'Region colors',
  fMulti:'Vary by constellation', fMono:'Single color', fOff:'None',
  vBounds:'Constellation borders', vMess:'Messier objects', vAuto:'Slow auto-rotate', back:'Back to title',
@@ -350,6 +419,12 @@ en:{
  left:'←left', right:'right→', up:'↑up', down:'↓down', isAt:(n,d)=>`(${n} is ${d})`,
  lit:n=>`✦ Stars lit in ${n}`,
  disp:'View ▾', pchip:'⏸ Pause',
+ quiz:'Constellation Quiz', qDesc:'Identify the named constellation by its star pattern. 10 questions.',
+ q4:'4 choices (easy)', q10:'10 choices (hard)', qStart:'Start',
+ qWhich:n=>`Which one is "${n}"?`, qProg:(i,n)=>`Question ${i} / ${n}`,
+ qCorrect:'✦ Correct!', qWrong:n=>`✕ The answer was "${n}"`, qTryAgain:'✕ Not that one… try again',
+ qResult:'Quiz Result', qScore:(s,n)=>`${s} / ${n} correct`, qTime:t=>`Time ${t}`,
+ qNew:'✦ New Best! ✦', qBest:(s,t)=>`Best: ${s} correct (${t})`, qAgain:'Play again', qQuit:'Quit',
 }};
 let LANG='ja';
 const T=k=>STR[LANG][k];
@@ -384,7 +459,7 @@ const FAMOUS=[
 
 /* ---------- Three.js ---------- */
 const canvas = el('sky');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(70,1,0.1,2000);
@@ -686,11 +761,15 @@ function applyLang(){
    optFillMulti:'fMulti',optFillMono:'fMono',optFillOff:'fOff',
    lblTgBounds:'vBounds',lblTgMessier:'vMess',lblTgAuto:'vAuto',backTitleBtn:'back',
    lblGHint:'opHint',lblGPS:'opPS',lblGLines:'opLines',lblGNames:'opNames',
-   dispChip:'disp',pauseChip:'pchip'};
+   dispChip:'disp',pauseChip:'pchip',
+   quizBtn:'quiz',qzTitle:'quiz',qz4Btn:'q4',qz10Btn:'q10',qzStartBtn:'qStart',
+   qzCancelBtn:'back',qzQuitBtn:'qQuit',qzResTitle:'qResult',qzNewRec:'qNew',
+   qzAgainBtn:'qAgain',qzBackBtn:'back'};
   for(const id in M) el(id).textContent=T(M[id]);
   el('titleIntro').innerHTML=T('intro');
   el('howtoText').innerHTML=T('howto');
   el('pauseNote').innerHTML=T('pnote');
+  el('qzDesc').textContent=T('qDesc');
   el('sortBtn').textContent = sortMode==='shuffle'?T('sortSh'):T('sortKa');
   labelItems.forEach(it=>{
     if(it.type==='name'&&it.ci>=0) it.el.textContent=nameOf(it.ci);
@@ -1100,18 +1179,55 @@ el('cfgInvert').addEventListener('change',()=>{ S.cfgInv=el('cfgInvert').checked
 el('cfgStarNames').addEventListener('change',()=>{ S.cfgStars=el('cfgStarNames').checked; saveCfg(); });
 el('langBtn').addEventListener('click',()=>{ LANG=LANG==='ja'?'en':'ja'; saveCfg(); applyLang(); });
 
-/* シェア(8) */
-el('shareBtn').addEventListener('click',async()=>{
-  const txt=T('shareText')(courseName(S.courseActive), fmtTime(S.elapsed));
-  try{
-    if(navigator.share){ await navigator.share({text:txt}); }
-    else{
-      await navigator.clipboard.writeText(txt);
-      el('shareBtn').textContent=T('copied');
-      setTimeout(()=>el('shareBtn').textContent=T('share'),1800);
-    }
-  }catch(e){}
-});
+/* シェア画像を作る: 天球の描画+タイトル・記録・URLを焼き込む */
+function shareUrlOf(){
+  return new URL('index.html', location.href).toString();
+}
+function buildShareCanvas(){
+  const sw=renderer.domElement.width, sh=renderer.domElement.height;
+  const W=1200, H=Math.round(W*sh/sw);
+  const out=document.createElement('canvas'); out.width=W; out.height=H;
+  const g=out.getContext('2d');
+  g.drawImage(renderer.domElement, 0,0,sw,sh, 0,0,W,H);
+  // 下部に帯を敷いてテキストを焼き込む
+  const bandH=Math.round(H*0.22);
+  const grad=g.createLinearGradient(0,H-bandH,0,H);
+  grad.addColorStop(0,'rgba(4,6,15,0)'); grad.addColorStop(0.35,'rgba(4,6,15,.88)'); grad.addColorStop(1,'rgba(4,6,15,.94)');
+  g.fillStyle=grad; g.fillRect(0,H-bandH,W,bandH);
+  const pad=W*0.035;
+  g.textBaseline='alphabetic';
+  g.fillStyle='#ffd98a';
+  g.font=`600 ${Math.round(W*0.052)}px "Hiragino Mincho ProN","Yu Mincho",serif`;
+  g.fillText('星合 -ほしあわせ-', pad, H-bandH*0.60);
+  g.fillStyle='#e8ecf5';
+  g.font=`${Math.round(W*0.028)}px "Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif`;
+  g.fillText(`${courseName(S.courseActive)}　${fmtTime(S.elapsed)}`, pad, H-bandH*0.34);
+  g.fillStyle='#8fd0ff';
+  g.font=`${Math.round(W*0.02)}px "Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif`;
+  g.fillText(shareUrlOf(), pad, H-bandH*0.12);
+  return out;
+}
+function canvasToBlob(cv){ return new Promise(res=>cv.toBlob(res,'image/png')); }
+function downloadBlob(blob, name){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ a.remove(); URL.revokeObjectURL(a.href); },1000);
+}
+async function shareResult(){
+  const cv=buildShareCanvas();
+  const blob=await canvasToBlob(cv);
+  const shareUrl=shareUrlOf();
+  const text=T('shareText')(courseName(S.courseActive), fmtTime(S.elapsed));
+  const file=new File([blob],'hoshiawase_result.png',{type:'image/png'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({text:text+'\n'+shareUrl, files:[file]}); return; }catch(e){ if(e.name==='AbortError') return; }
+  }
+  downloadBlob(blob,'hoshiawase_result.png');
+  el('shareBtn').textContent=T('shareSaved');
+  setTimeout(()=>el('shareBtn').textContent=T('share'),2600);
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,'_blank');
+}
+el('shareBtn').addEventListener('click',shareResult);
 
 /* 一時停止(6) */
 function pauseGame(){
@@ -1146,6 +1262,9 @@ function goTitle(){
   el('hintPanel').style.display='none';
   el('pauseOverlay').style.display='none';
   el('clearOverlay').style.display='none';
+  el('quizSetup').style.display='none';
+  el('quizPlay').style.display='none';
+  el('quizResult').style.display='none';
   document.body.classList.remove('puzzle');
   S.running=false;
   resetAll();
@@ -1157,6 +1276,134 @@ el('pauseChip').addEventListener('click',pauseGame);
 el('resumeGameBtn').addEventListener('click',resumeGame);
 el('quitBtn').addEventListener('click',quitToTitle);
 el('quitNoSaveBtn').addEventListener('click',quitNoSave);
+
+/* ---------- 星座あてクイズ ---------- */
+const QZ={mode:'4', N:10, qs:[], idx:0, score:0, t0:0, wrongThis:false, locked:false};
+function drawLineCard(cv, ci){
+  // 星座線(+主な星)だけでカードを描く。領域は描かない
+  const g=cv.getContext('2d'); const W=cv.width, H=cv.height;
+  g.clearRect(0,0,W,H);
+  const proj=projMaker(ci);
+  const linePts=[];
+  DATA.lines[ci].forEach(seg=>seg.forEach(q=>linePts.push(proj(q[0]/100,q[1]/100))));
+  pieceStars[ci].forEach(st=>{ if(st[2]<=45) linePts.push(proj(st[0]/100,st[1]/100)); });
+  let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+  linePts.forEach(p=>{ if(p.x<minx)minx=p.x; if(p.x>maxx)maxx=p.x; if(p.y<miny)miny=p.y; if(p.y>maxy)maxy=p.y; });
+  if(minx>maxx){minx=-1;maxx=1;miny=-1;maxy=1;}
+  const pad=10, sc=Math.min((W-pad*2)/((maxx-minx)||1),(H-pad*2)/((maxy-miny)||1));
+  const px=p=>({x:pad+(p.x-minx)*sc+(W-pad*2-(maxx-minx)*sc)/2, y:H-pad-((p.y-miny)*sc+(H-pad*2-(maxy-miny)*sc)/2)});
+  g.strokeStyle='rgba(255,217,138,.75)'; g.lineWidth=1.4; g.lineJoin='round'; g.lineCap='round';
+  DATA.lines[ci].forEach(seg=>{
+    g.beginPath();
+    seg.forEach((q,i)=>{const P=px(proj(q[0]/100,q[1]/100)); i?g.lineTo(P.x,P.y):g.moveTo(P.x,P.y);});
+    g.stroke();
+  });
+  pieceStars[ci].forEach(st=>{
+    const m=st[2]/10; if(m>4.5) return;
+    const P=px(proj(st[0]/100,st[1]/100));
+    g.globalAlpha=Math.min(1,.4+(4.8-m)*.2);
+    g.fillStyle='#fff6e0';
+    g.beginPath(); g.arc(P.x,P.y,Math.max(1,(4.8-m)*.65),0,6.283); g.fill();
+  });
+  g.globalAlpha=1;
+}
+function qzKey(){ return 'hoshi2-quiz'+QZ.mode; }
+async function updateQzBest(target){
+  const b=await sGet(qzKey());
+  let txt='';
+  if(b){ try{ const o=JSON.parse(b); txt=T('qBest')(o.s, fmtTime(o.t)); }catch(e){} }
+  el(target).textContent=txt;
+}
+function openQuizSetup(){
+  el('titleOverlay').style.display='none';
+  el('quizSetup').style.display='flex';
+  updateQzBest('qzBestLine');
+}
+function makeQCard(ci, big){
+  const d=document.createElement('div'); d.className='qcard';
+  const cv=document.createElement('canvas');
+  cv.width=big?300:200; cv.height=big?208:140;
+  d.appendChild(cv);
+  drawLineCard(cv, ci);
+  d.addEventListener('click',()=>qzPick(ci,d));
+  d.dataset.ci=ci;
+  return d;
+}
+function startQuiz(){
+  QZ.qs=shuffle(C.map(c=>c.i)).slice(0,QZ.N);
+  QZ.idx=0; QZ.score=0; QZ.t0=performance.now();
+  el('quizSetup').style.display='none';
+  el('quizResult').style.display='none';
+  el('quizPlay').style.display='flex';
+  el('qzFeed').textContent=''; el('qzFeed').className='';
+  el('qzGrid4').style.display='flex';
+  el('qzGrid4').classList.toggle('ten', QZ.mode==='10');
+  qzNext();
+}
+function qzNext(){
+  if(QZ.idx>=QZ.N){ qzFinish(); return; }
+  QZ.wrongThis=false; QZ.locked=false;
+  const target=QZ.qs[QZ.idx];
+  el('qzQ').textContent=T('qWhich')(nameOf(target));
+  el('qzProg').textContent=T('qProg')(QZ.idx+1, QZ.N);
+  el('qzFeed').textContent=''; el('qzFeed').className='';
+  const nChoice = QZ.mode==='4' ? 4 : 10;
+  const others=shuffle(C.map(c=>c.i).filter(i=>i!==target)).slice(0,nChoice-1);
+  const grid=el('qzGrid4'); grid.innerHTML='';
+  shuffle([target,...others]).forEach(ci=>grid.appendChild(makeQCard(ci, QZ.mode==='4')));
+}
+function qzPick(ci, card){
+  if(QZ.locked) return;
+  const target=QZ.qs[QZ.idx];
+  if(ci===target){
+    QZ.locked=true;
+    if(!QZ.wrongThis) QZ.score++;
+    card.classList.add('good');
+    el('qzFeed').textContent=T('qCorrect'); el('qzFeed').className='ok';
+    chime(QZ.score);
+    QZ.idx++;
+    setTimeout(qzNext, 850);
+  } else if(QZ.mode==='4'){
+    QZ.locked=true;
+    card.classList.add('bad');
+    el('qzGrid4').querySelectorAll('.qcard').forEach(c=>{
+      if(Number(c.dataset.ci)===target) c.classList.add('good'); else if(c!==card) c.classList.add('dim');
+    });
+    el('qzFeed').textContent=T('qWrong')(nameOf(target)); el('qzFeed').className='ng';
+    beep(160,.12,'sawtooth',.03);
+    QZ.idx++;
+    setTimeout(qzNext, 1500);
+  } else {
+    // 10択: 正解するまで再挑戦可(得点は一発正解のみ)。外したカードは薄く
+    QZ.wrongThis=true;
+    card.classList.remove('bad'); void card.offsetWidth; card.classList.add('bad');
+    setTimeout(()=>card.classList.add('dim'), 350);
+    el('qzFeed').textContent=T('qTryAgain'); el('qzFeed').className='ng';
+    beep(160,.12,'sawtooth',.03);
+  }
+}
+async function qzFinish(){
+  const t=Math.round(performance.now()-QZ.t0);
+  el('quizPlay').style.display='none';
+  el('qzScore').textContent=T('qScore')(QZ.score, QZ.N);
+  el('qzTimeLine').textContent=T('qTime')(fmtTime(t));
+  let best=null;
+  const b=await sGet(qzKey());
+  if(b){ try{ best=JSON.parse(b); }catch(e){} }
+  const isNew = !best || QZ.score>best.s || (QZ.score===best.s && t<best.t);
+  if(isNew){ best={s:QZ.score, t}; sSet(qzKey(), JSON.stringify(best)); }
+  el('qzNewRec').style.display=isNew?'block':'none';
+  el('qzResBest').textContent=T('qBest')(best.s, fmtTime(best.t));
+  el('quizResult').style.display='flex';
+}
+el('quizBtn').addEventListener('click',()=>{audioInit();openQuizSetup();});
+el('qz4Btn').addEventListener('click',()=>{QZ.mode='4';el('qz4Btn').classList.add('sel');el('qz10Btn').classList.remove('sel');updateQzBest('qzBestLine');});
+el('qz10Btn').addEventListener('click',()=>{QZ.mode='10';el('qz10Btn').classList.add('sel');el('qz4Btn').classList.remove('sel');updateQzBest('qzBestLine');});
+el('qzStartBtn').addEventListener('click',startQuiz);
+el('qzCancelBtn').addEventListener('click',()=>{el('quizSetup').style.display='none';el('titleOverlay').style.display='flex';});
+el('qzQuitBtn').addEventListener('click',()=>{el('quizPlay').style.display='none';el('titleOverlay').style.display='flex';});
+el('qzAgainBtn').addEventListener('click',()=>{el('quizResult').style.display='none';openQuizSetup();});
+el('qzBackBtn').addEventListener('click',()=>{el('quizResult').style.display='none';el('titleOverlay').style.display='flex';});
 
 el('startBtn').addEventListener('click',()=>{audioInit();startPuzzle(false);});
 el('resumeBtn').addEventListener('click',()=>{audioInit();startPuzzle(true);});
