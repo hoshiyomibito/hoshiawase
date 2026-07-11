@@ -38,6 +38,7 @@
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
   .card b{display:block;color:var(--star-gold);font-size:22px;margin-bottom:4px}
+  .card b small{font-size:12px;margin-left:3px;opacity:.85}
   .card span{font-size:12px;opacity:.75}
   footer{text-align:center;font-size:12.5px;opacity:.55;margin-top:60px;padding-top:20px;border-top:1px solid var(--line)}
   footer a{color:#9fc4ff;text-decoration:none;margin:0 8px}
@@ -56,9 +57,9 @@
   <section>
     <h2>このゲームの特徴</h2>
     <div class="cards">
-      <div class="card"><b>88</b><span>国際天文学連合(IAU)公式の星座境界データを使用</span></div>
-      <div class="card"><b>5,044</b><span>実在の恒星(6等星まで)を実座標・実色で再現</span></div>
-      <div class="card"><b>3</b><span>初級(黄道12星座)・中級(トレミー48星座)・上級(全88星座)</span></div>
+      <div class="card"><b>88<small>星座</small></b><span>収録星座数 ── 国際天文学連合(IAU)公式の境界データを全星座に使用</span></div>
+      <div class="card"><b>5,044<small>個</small></b><span>収録恒星数 ── 6等星までの実在の恒星を実際の位置・色で再現</span></div>
+      <div class="card"><b>3<small>コース</small></b><span>難易度 ── 初級:黄道12星座/中級:トレミーの48星座/上級:全天88星座</span></div>
     </div>
     <ul>
       <li>ピースの形は球面上の見え方に忠実な正距方位図法で描画</li>
