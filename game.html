@@ -47,10 +47,10 @@
   #titleTop3{font-size:11.5px;opacity:.75;margin-top:10px;letter-spacing:.05em}
 
   /* ゲーム中の表示設定パネル */
-  #hintPanel{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:12;
+  #hintPanel{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:12;max-width:92vw;
     background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
   #hintPanel label{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;cursor:pointer}
-  #hintPanel input{accent-color:var(--star-gold);width:15px;height:15px}
+  #hintPanel input{accent-color:var(--star-gold);width:15px;height:15px;flex:0 0 auto}
   #pauseChip,#dispChip{cursor:pointer;font-size:12px}
   #viewPanel select{background:#0c1430;color:#dfe8ff;border:1px solid var(--line);border-radius:6px;
     padding:3px 6px;font-size:12px;margin-left:6px;font-family:var(--sans)}
@@ -171,8 +171,8 @@
   <label><input type="checkbox" id="gHint"><span id="lblGHint"></span></label>
   <label><input type="checkbox" id="gHintStars"><span id="lblGHintStars"></span></label>
   <label><input type="checkbox" id="gHintLines"><span id="lblGHintLines"></span></label>
-  <label style="display:flex;align-items:center;gap:8px"><span id="lblGPiece"></span>
-    <select id="gPieceMode" style="background:#0c1430;color:#dfe8ff;border:1px solid var(--line);border-radius:6px;padding:3px 6px;font-size:12px;font-family:var(--sans)">
+  <label style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span id="lblGPiece" style="white-space:nowrap"></span>
+    <select id="gPieceMode" style="background:#0c1430;color:#dfe8ff;border:1px solid var(--line);border-radius:6px;padding:3px 6px;font-size:12px;font-family:var(--sans);max-width:70vw">
       <option value="region" id="optGPieceRegion"></option>
       <option value="lines" id="optGPieceLines"></option>
       <option value="both" id="optGPieceBoth"></option>
@@ -234,8 +234,8 @@
       <label><input type="checkbox" id="opHint" checked><span id="lblOpHint"></span></label>
       <label><input type="checkbox" id="opHintStars"><span id="lblOpHintStars"></span></label>
       <label><input type="checkbox" id="opHintLines"><span id="lblOpHintLines"></span></label>
-      <label style="display:flex;align-items:center;gap:8px;padding:3px 0"><span id="lblOpPiece"></span>
-        <select id="opPieceMode" style="background:#0c1430;color:#dfe8ff;border:1px solid var(--line);border-radius:6px;padding:3px 6px;font-size:12px;font-family:var(--sans)">
+      <label style="display:flex;align-items:center;gap:8px;padding:3px 0;flex-wrap:wrap"><span id="lblOpPiece" style="white-space:nowrap"></span>
+        <select id="opPieceMode" style="background:#0c1430;color:#dfe8ff;border:1px solid var(--line);border-radius:6px;padding:3px 6px;font-size:12px;font-family:var(--sans);max-width:70vw">
           <option value="region" id="optPieceRegion"></option>
           <option value="lines" id="optPieceLines"></option>
           <option value="both" id="optPieceBoth"></option>
@@ -384,7 +384,7 @@ ja:{
  intro:'まだ何もない、ほの暗い天球のまんなかに あなたは立っています。<br>星座の「領域ピース」を 本来の場所へはめこむたび、<br>その一角に星々が灯り、夜空が完成していきます。',
  cz:'初級・黄道12星座', cp:'中級・トレミーの48星座', ca:'上級・全天88星座',
  cnz:'初級(黄道12星座)', cnp:'中級(トレミー48星座)', cna:'上級(全天88星座)',
- de:'やさしい', dn:'ふつう', dh:'むずかしい', dr:'実際の夜空',
+ de:'やさしい', dn:'ふつう', dh:'むずかしい', dr:'実際の夜空', dc:'カスタム',
  opHint:'境界ヒント(全星座の境界線)', opPiece:'ピースの見た目',
  pcRegion:'星座領域のみ(マニアック)', pcLines:'星の並びのみ(ふつう)', pcBoth:'領域+星の並び(やさしい)',
  opHintStars:'星ヒント(天球に星をうっすら表示)', opHintLines:'星座線ヒント(天球に星座線をうっすら表示)',
@@ -423,7 +423,7 @@ en:{
  intro:'You stand at the center of a dim, empty celestial sphere.<br>Fit each constellation "region piece" into its true place,<br>and its stars will light up — completing the night sky.',
  cz:'Beginner・12 Zodiac', cp:'Intermediate・Ptolemy 48', ca:'Advanced・All 88',
  cnz:'Beginner (12 Zodiac)', cnp:'Intermediate (Ptolemy 48)', cna:'Advanced (All 88)',
- de:'Easy', dn:'Normal', dh:'Hard', dr:'Real Night Sky',
+ de:'Easy', dn:'Normal', dh:'Hard', dr:'Real Night Sky', dc:'Custom',
  opHint:'Boundary hint (all borders)', opPiece:'Piece appearance',
  pcRegion:'Region only (expert)', pcLines:'Star pattern only (normal)', pcBoth:'Region + stars (easy)',
  opHintStars:'Star hint (faint stars on the sphere)', opHintLines:'Line hint (faint constellation lines)',
@@ -471,6 +471,17 @@ function courseIdxSet(c){
   return new Set(ids.map(id=>DATA.order.indexOf(id)));
 }
 const courseName=c=>T(c==='z'?'cnz':c==='p'?'cnp':'cna');
+function diffName(){
+  // 現在の設定がどのプリセットと一致するか判定(一致しなければカスタム)
+  const sig=[S.hint,S.hintStars,S.hintLineart,S.pieceMode,S.optLines,S.optNames].join();
+  const P={
+    'true,true,true,both,true,true':'de',      // やさしい
+    'true,true,true,both,true,false':'dn',     // ふつう
+    'true,true,false,lines,true,false':'dh',   // むずかしい
+    'false,true,false,lines,false,false':'dr', // 実際の夜空
+  };
+  return T(P[sig]||'dc');
+}
 
 /* ---------- 有名な恒星(5): 1等星21+著名な星 ---------- */
 const FAMOUS=[
@@ -1084,7 +1095,7 @@ function finishGame(){
   sDel('hoshi2-save'); window.__save=null; el('resumeBtn').style.display='none';
   const ms=S.elapsed;
   el('clearTime').textContent=fmtTime(ms);
-  el('clearCourse').textContent=courseName(S.courseActive);
+  el('clearCourse').textContent=courseName(S.courseActive)+'・'+diffName();
   const isNew = S.top3.length===0 || ms<S.top3[0];
   S.top3=[...S.top3, ms].sort((a,b)=>a-b).slice(0,3);
   S.best=S.top3[0];
@@ -1298,7 +1309,7 @@ function buildShareCanvas(){
   g.beginPath(); g.moveTo(W/2-PW*0.34,cy-PH*0.13); g.lineTo(W/2+PW*0.34,cy-PH*0.13); g.stroke();
   g.fillStyle='#a7e8b4';
   g.font=`600 ${Math.round(W*0.030)}px ${SANS}`;
-  g.fillText('✦ '+courseName(S.courseActive)+clearWord+' ✦', W/2, cy);
+  g.fillText('✦ '+courseName(S.courseActive)+'・'+diffName()+clearWord+' ✦', W/2, cy);
   // クリアタイム(主役)
   g.fillStyle='#ffd98a';
   g.shadowColor='rgba(255,217,138,.75)'; g.shadowBlur=30;
@@ -1327,7 +1338,7 @@ async function shareResult(){
   const cv=buildShareCanvas();
   const blob=await canvasToBlob(cv);
   const shareUrl=shareUrlOf();
-  const text=T('shareText')(courseName(S.courseActive), fmtTime(S.elapsed));
+  const text=T('shareText')(courseName(S.courseActive)+'・'+diffName(), fmtTime(S.elapsed));
   const file=new File([blob],'hoshiawase_result.png',{type:'image/png'});
   if(navigator.canShare && navigator.canShare({files:[file]})){
     try{ await navigator.share({text:text+'\n'+shareUrl, files:[file]}); return; }catch(e){ if(e.name==='AbortError') return; }
