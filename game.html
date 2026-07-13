@@ -220,29 +220,29 @@
     <div class="sub" id="titleSub">ほしあわせ ── 星座領域パズル</div>
     <p id="titleIntro"></p>
     <div id="courseRow">
-      <button class="dbtn cbtn" data-c="z" id="cbZ"></button>
+      <button class="dbtn cbtn sel" data-c="z" id="cbZ"></button>
       <button class="dbtn cbtn" data-c="p" id="cbP"></button>
-      <button class="dbtn cbtn sel" data-c="a" id="cbA"></button>
+      <button class="dbtn cbtn" data-c="a" id="cbA"></button>
     </div>
     <div id="diffRow">
-      <button class="dbtn" data-d="easy" id="dbEasy"></button>
-      <button class="dbtn sel" data-d="normal" id="dbNorm"></button>
+      <button class="dbtn sel" data-d="easy" id="dbEasy"></button>
+      <button class="dbtn" data-d="normal" id="dbNorm"></button>
       <button class="dbtn" data-d="hard" id="dbHard"></button>
       <button class="dbtn" data-d="real" id="dbReal"></button>
     </div>
     <div id="optRows">
       <label><input type="checkbox" id="opHint" checked><span id="lblOpHint"></span></label>
-      <label><input type="checkbox" id="opHintStars"><span id="lblOpHintStars"></span></label>
-      <label><input type="checkbox" id="opHintLines"><span id="lblOpHintLines"></span></label>
+      <label><input type="checkbox" id="opHintStars" checked><span id="lblOpHintStars"></span></label>
+      <label><input type="checkbox" id="opHintLines" checked><span id="lblOpHintLines"></span></label>
       <label style="display:flex;align-items:center;gap:8px;padding:3px 0;flex-wrap:wrap"><span id="lblOpPiece" style="white-space:nowrap"></span>
         <select id="opPieceMode" style="background:#0c1430;color:#dfe8ff;border:1px solid var(--line);border-radius:6px;padding:3px 6px;font-size:12px;font-family:var(--sans);max-width:70vw">
           <option value="region" id="optPieceRegion"></option>
           <option value="lines" id="optPieceLines"></option>
-          <option value="both" id="optPieceBoth"></option>
+          <option value="both" id="optPieceBoth" selected></option>
         </select>
       </label>
       <label><input type="checkbox" id="opLines" checked><span id="lblOpLines"></span></label>
-      <label><input type="checkbox" id="opNames"><span id="lblOpNames"></span></label>
+      <label><input type="checkbox" id="opNames" checked><span id="lblOpNames"></span></label>
     </div>
     <br>
     <button class="btn" id="startBtn"></button>
@@ -759,10 +759,10 @@ function buildMessier(){
 const S = {
   mode:'title', selected:null, placedCount:0, pre:0,
   startAt:0, elapsed:0, running:false, best:null, top3:[],
-  course:'a', courseActive:'a',
+  course:'z', courseActive:'z',
   hint:true, missCount:0,
-  optNames:false, optLines:true, pieceMode:'both',
-  hintStars:false, hintLineart:false,
+  optNames:true, optLines:true, pieceMode:'both',
+  hintStars:true, hintLineart:true,
   sound:true, cfgInv:false, cfgStars:true,
   showNames:false, showMessier:false, showBounds:false, showLines:true, autoRotate:false, showStars:true,
 };
@@ -787,6 +787,7 @@ async function loadPersist(){
     if(c.lang) LANG=c.lang;
     S.sound=c.snd!==0; S.cfgInv=!!c.inv; S.cfgStars=c.st!==0;
     if(c.course) S.course=c.course;
+    if('qh' in c) QZ.hint=c.qh!==0;   // クイズのヒント有無も記憶
   }catch(e){} }
   el('cfgSound').checked=S.sound; el('cfgInvert').checked=S.cfgInv; el('cfgStarNames').checked=S.cfgStars;
   document.querySelectorAll('.cbtn').forEach(b=>b.classList.toggle('sel', b.dataset.c===S.course));
@@ -799,11 +800,13 @@ async function loadPersist(){
     el('opLines').checked=!!o.l; el('opNames').checked=!!o.n;
     if('hs' in o) el('opHintStars').checked=!!o.hs;
     if('hl' in o) el('opHintLines').checked=!!o.hl; }catch(e){} }
+  highlightDiffButtons();   // 復元した設定に合うプリセットを点灯(不一致ならカスタム=消灯)
+  syncQzHintButtons();
   const sv = await sGet('hoshi2-save');
   if(sv){ try{ const o=JSON.parse(sv); if(o.p && o.p.length>0 && o.p.length<N){ el('resumeBtn').style.display='inline-block'; window.__save=o; } }catch(e){} }
 }
 function saveCfg(){
-  sSet('hoshi2-cfg', JSON.stringify({lang:LANG, snd:S.sound?1:0, inv:S.cfgInv?1:0, st:S.cfgStars?1:0, course:S.course}));
+  sSet('hoshi2-cfg', JSON.stringify({lang:LANG, snd:S.sound?1:0, inv:S.cfgInv?1:0, st:S.cfgStars?1:0, course:S.course, qh:QZ.hint?1:0}));
 }
 function updateBestUI(){
   el('bestSmall').textContent = S.top3.length?T('best')(fmtTime(S.top3[0])):'';
@@ -1233,23 +1236,44 @@ el('gPieceMode').addEventListener('change',()=>{
 el('gLines').addEventListener('change',()=>{ S.optLines=el('gLines').checked; if(S.mode==='puzzle') linesGroup.visible=S.optLines; saveProgress(); });
 el('gNames').addEventListener('change',()=>{ S.optNames=el('gNames').checked; saveProgress(); });
 
-/* 難易度プリセット */
-document.querySelectorAll('.dbtn:not(.cbtn)').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.dbtn:not(.cbtn)').forEach(x=>x.classList.remove('sel'));
-  b.classList.add('sel');
-  const d=b.dataset.d;
-  // 天球ヒント
-  el('opHint').checked      = d!=='real';                 // 境界ヒント: 実際の夜空のみOFF
-  el('opHintStars').checked = (d!=='easy'||true);          // 星ヒントは全難易度で既定ON
-  el('opHintLines').checked = (d==='easy'||d==='normal');  // 星座線ヒント: やさしい・ふつう
-  // ピースの見た目: やさしい・ふつうは領域+星、むずかしい・実際の夜空は星の並びのみ
-  el('opPieceMode').value   = (d==='easy'||d==='normal') ? 'both' : 'lines';
-  // 配置後の演出・名前
-  el('opLines').checked = d!=='real';
-  el('opNames').checked = d==='easy';
+/* 難易度プリセット
+   (1) セレクタを #diffRow 配下に限定。以前の .dbtn:not(.cbtn) はクイズの
+       ヒント切替ボタン(qzHintOn/Off)まで拾ってしまい、クイズ設定を触るだけで
+       パズルの難易度オプションが書き換わるバグがあった */
+const DIFF_PRESETS={
+  easy:  {h:true, hs:true, hl:true,  pm:'both',  l:true,  n:true },
+  normal:{h:true, hs:true, hl:true,  pm:'both',  l:true,  n:false},
+  hard:  {h:true, hs:true, hl:false, pm:'lines', l:true,  n:false},
+  real:  {h:false,hs:true, hl:false, pm:'lines', l:false, n:false},
+};
+function titleOptsSig(){
+  return [el('opHint').checked, el('opHintStars').checked, el('opHintLines').checked,
+          el('opPieceMode').value, el('opLines').checked, el('opNames').checked].join();
+}
+function presetSig(p){ return [p.h,p.hs,p.hl,p.pm,p.l,p.n].join(); }
+function highlightDiffButtons(){
+  // 現在のオプションと一致するプリセットだけを点灯(カスタム時は全消灯)
+  const sig=titleOptsSig();
+  document.querySelectorAll('#diffRow .dbtn').forEach(b=>{
+    b.classList.toggle('sel', presetSig(DIFF_PRESETS[b.dataset.d])===sig);
+  });
+}
+function saveTitleOpts(){
+  // 選んだ難易度・オプションはその場で保存し、次回起動時に復元する
+  sSet('hoshi2-opts', JSON.stringify({h:el('opHint').checked?1:0, pm:el('opPieceMode').value,
+    l:el('opLines').checked?1:0, n:el('opNames').checked?1:0,
+    hs:el('opHintStars').checked?1:0, hl:el('opHintLines').checked?1:0}));
+}
+document.querySelectorAll('#diffRow .dbtn').forEach(b=>b.addEventListener('click',()=>{
+  const p=DIFF_PRESETS[b.dataset.d];
+  el('opHint').checked=p.h; el('opHintStars').checked=p.hs; el('opHintLines').checked=p.hl;
+  el('opPieceMode').value=p.pm; el('opLines').checked=p.l; el('opNames').checked=p.n;
+  highlightDiffButtons();
+  saveTitleOpts();
 }));
 ['opHint','opHintStars','opHintLines','opPieceMode','opLines','opNames'].forEach(id=>el(id).addEventListener('change',()=>{
-  document.querySelectorAll('.dbtn:not(.cbtn)').forEach(x=>x.classList.remove('sel'));
+  highlightDiffButtons();
+  saveTitleOpts();
 }));
 
 /* コース選択(3) */
@@ -1271,6 +1295,8 @@ el('langBtn').addEventListener('click',()=>{ LANG=LANG==='ja'?'en':'ja'; saveCfg
 
 /* シェア画像を作る: 天球の描画+タイトル・記録・URLを焼き込む */
 function shareUrlOf(){
+  // GitHub Pagesでは .../hoshiawase/ がそのままトップページになる
+  if(location.protocol==='http:'||location.protocol==='https:') return new URL('./', location.href).toString();
   return new URL('index.html', location.href).toString();
 }
 function buildShareCanvas(){
@@ -1335,18 +1361,32 @@ function downloadBlob(blob, name){
   setTimeout(()=>{ a.remove(); URL.revokeObjectURL(a.href); },1000);
 }
 async function shareResult(){
-  const cv=buildShareCanvas();
-  const blob=await canvasToBlob(cv);
   const shareUrl=shareUrlOf();
   const text=T('shareText')(courseName(S.courseActive)+'・'+diffName(), fmtTime(S.elapsed));
-  const file=new File([blob],'hoshiawase_result.png',{type:'image/png'});
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    try{ await navigator.share({text:text+'\n'+shareUrl, files:[file]}); return; }catch(e){ if(e.name==='AbortError') return; }
+  // (修正) Web Share APIが使えない環境では、クリック直後の同期文脈で
+  // 投稿ウィンドウを開く(await後のwindow.openはポップアップブロックされやすい)
+  let canShareFiles=false;
+  try{
+    canShareFiles = !!(navigator.canShare &&
+      navigator.canShare({files:[new File([new Uint8Array(1)],'t.png',{type:'image/png'})]}));
+  }catch(e){}
+  let tw=null;
+  if(!canShareFiles){
+    tw=window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,'_blank');
+  }
+  const cv=buildShareCanvas();
+  const blob=await canvasToBlob(cv);
+  if(canShareFiles){
+    const file=new File([blob],'hoshiawase_result.png',{type:'image/png'});
+    try{ await navigator.share({text:text+'\n'+shareUrl, files:[file]}); return; }
+    catch(e){ if(e.name==='AbortError') return; }
   }
   downloadBlob(blob,'hoshiawase_result.png');
   el('shareBtn').textContent=T('shareSaved');
   setTimeout(()=>el('shareBtn').textContent=T('share'),2600);
-  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,'_blank');
+  if(!tw && !canShareFiles){
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,'_blank');
+  }
 }
 el('shareBtn').addEventListener('click',shareResult);
 
@@ -1547,9 +1587,13 @@ async function qzFinish(){
   el('qzResBest').textContent=T('qBest')(best.s, fmtTime(best.t));
   el('quizResult').style.display='flex';
 }
+function syncQzHintButtons(){
+  el('qzHintOnBtn').classList.toggle('sel', QZ.hint);
+  el('qzHintOffBtn').classList.toggle('sel', !QZ.hint);
+}
 el('quizBtn').addEventListener('click',()=>{audioInit();openQuizSetup();});
-el('qzHintOnBtn').addEventListener('click',()=>{QZ.hint=true;el('qzHintOnBtn').classList.add('sel');el('qzHintOffBtn').classList.remove('sel');updateQzBest('qzBestLine');});
-el('qzHintOffBtn').addEventListener('click',()=>{QZ.hint=false;el('qzHintOffBtn').classList.add('sel');el('qzHintOnBtn').classList.remove('sel');updateQzBest('qzBestLine');});
+el('qzHintOnBtn').addEventListener('click',()=>{QZ.hint=true;syncQzHintButtons();saveCfg();updateQzBest('qzBestLine');});
+el('qzHintOffBtn').addEventListener('click',()=>{QZ.hint=false;syncQzHintButtons();saveCfg();updateQzBest('qzBestLine');});
 el('qzStartBtn').addEventListener('click',startQuiz);
 el('qzCancelBtn').addEventListener('click',()=>{el('quizSetup').style.display='none';el('titleOverlay').style.display='flex';});
 el('qzQuitBtn').addEventListener('click',()=>{clearInterval(QZ.hintTimer);el('quizPlay').style.display='none';el('titleOverlay').style.display='flex';});
