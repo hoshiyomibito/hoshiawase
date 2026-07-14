@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>星合 -ほしあわせ- 88星座パズル</title>
+<meta name="description" content="実在のIAU星座境界データと5,044個の恒星で夜空を組み上げる、無料のブラウザ3D天球パズル。星座あてクイズも収録。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="星合 -ほしあわせ-">
+<meta property="og:title" content="星合 -ほしあわせ- | 88星座パズル">
+<meta property="og:description" content="実在のIAU星座境界データと5,044個の恒星で夜空を組み上げる、無料のブラウザ3D天球パズル。星座あてクイズも収録。">
+<meta property="og:url" content="https://hoshiyomibito.github.io/hoshiawase/">
+<meta property="og:image" content="https://hoshiyomibito.github.io/hoshiawase/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root{
     --night:#04060f; --star-gold:#ffd98a; --ui-blue:#8fd0ff; --emerald:#6ee6be;
@@ -152,6 +162,21 @@
   #bestLine{font-size:13px;opacity:.8;margin-bottom:18px}
   #newRecord{color:var(--ok);font-size:14px;letter-spacing:.2em;display:none;margin-bottom:6px}
   .howto{font-size:11.5px;line-height:1.9;opacity:.58;margin-top:12px}
+
+  /* ---- スクリーンショットモード ---- */
+  body.shotmode #hud-top,body.shotmode #trayWrap,body.shotmode #hintPanel,
+  body.shotmode #viewPanel,body.shotmode #hint-bar,body.shotmode #namePop{display:none!important}
+  .shotbtn{margin-top:8px;width:100%;background:none;border:1px solid var(--line);color:#cfe2ff;
+    border-radius:8px;padding:6px;font-size:12px;cursor:pointer;font-family:var(--sans)}
+  #shotChip{position:fixed;top:10px;right:10px;z-index:40;display:none;background:rgba(8,14,32,.6);
+    border:1px solid rgba(143,208,255,.3);border-radius:999px;padding:6px 13px;font-size:12px;color:#cfe2ff;
+    cursor:pointer;transition:opacity .5s;user-select:none;-webkit-user-select:none}
+  #shotChip.dim{opacity:.22}
+  #shotChip:hover,#shotChip:active{opacity:1}
+  #shotToast{position:fixed;top:52px;left:50%;transform:translateX(-50%);z-index:40;display:none;
+    background:rgba(8,14,32,.88);border:1px solid rgba(143,208,255,.3);border-radius:999px;
+    padding:8px 18px;font-size:12.5px;color:#cfe2ff;transition:opacity .7s;max-width:92vw;text-align:center;
+    pointer-events:none}
 </style>
 </head>
 <body>
@@ -180,8 +205,11 @@
   </label>
   <label><input type="checkbox" id="gLines"><span id="lblGLines"></span></label>
   <label><input type="checkbox" id="gNames"><span id="lblGNames"></span></label>
+  <button class="shotbtn" id="shotBtnGame"></button>
 </div>
 <div id="hint-bar"></div>
+<div id="shotChip"></div>
+<div id="shotToast"></div>
 
 <div id="trayWrap" class="hud" style="display:none">
   <div id="trayBar">
@@ -207,6 +235,7 @@
   <label><input type="checkbox" id="tgBounds"><span id="lblTgBounds"></span></label>
   <label><input type="checkbox" id="tgMessier"><span id="lblTgMessier"></span></label>
   <label><input type="checkbox" id="tgAuto"><span id="lblTgAuto"></span></label>
+  <button class="shotbtn" id="shotBtnView"></button>
   <button class="vbtn" id="backTitleBtn"></button>
 </div>
 
@@ -417,6 +446,9 @@ ja:{
  qCorrect:'✦ 正解!', qWrong:n=>`✕ あなたが選んだのは「${n}」`, qTryAgain:'✕ ちがう星座… もう一度',
  qResult:'クイズ結果', qScore:(s,n)=>`${s} / ${n} 問正解`, qTime:t=>`タイム ${t}`,
  qNew:'✦ ベスト更新 ✦', qBest:(s,t)=>`ベスト: ${s}問正解 (${t})`, qAgain:'もう一度', qQuit:'やめる',
+ shotBtn:'📷 UIを隠す(スクリーンショット用)', shotExit:'📷 タップで元に戻す',
+ shotMsg:'スクリーンショットモード ── 右上の 📷 か Hキー で元に戻ります',
+ shotMsgPz:'スクリーンショットモード(タイマー停止中) ── 右上の 📷 か Hキー で元に戻ります',
 },
 en:{
  sub:'HOSHIAWASE ── Constellation Region Puzzle',
@@ -456,6 +488,9 @@ en:{
  qCorrect:'✦ Correct!', qWrong:n=>`✕ You picked "${n}"`, qTryAgain:'✕ Not that one… try again',
  qResult:'Quiz Result', qScore:(s,n)=>`${s} / ${n} correct`, qTime:t=>`Time ${t}`,
  qNew:'✦ New Best! ✦', qBest:(s,t)=>`Best: ${s} correct (${t})`, qAgain:'Play again', qQuit:'Quit',
+ shotBtn:'📷 Hide UI (for screenshots)', shotExit:'📷 Tap to restore',
+ shotMsg:'Screenshot mode — tap 📷 (top right) or press H to restore',
+ shotMsgPz:'Screenshot mode (timer paused) — tap 📷 (top right) or press H to restore',
 }};
 let LANG='ja';
 const T=k=>STR[LANG][k];
@@ -832,7 +867,8 @@ function applyLang(){
    dispChip:'disp',pauseChip:'pchip',
    quizBtn:'quiz',qzTitle:'quiz',qzHintOnBtn:'qHintOn',qzHintOffBtn:'qHintOff',qzStartBtn:'qStart',qzHintNote:'qHintNote',
    qzCancelBtn:'back',qzQuitBtn:'qQuit',qzResTitle:'qResult',qzNewRec:'qNew',
-   qzAgainBtn:'qAgain',qzBackBtn:'back'};
+   qzAgainBtn:'qAgain',qzBackBtn:'back',
+   shotBtnGame:'shotBtn',shotBtnView:'shotBtn',shotChip:'shotExit'};
   for(const id in M) el(id).textContent=T(M[id]);
   el('titleIntro').innerHTML=T('intro');
   el('howtoText').innerHTML=T('howto');
@@ -1122,6 +1158,7 @@ function resetAll(){
   S.placedCount=0; S.selected=null;
 }
 function startPuzzle(resume){
+  shotExit();
   S.mode='puzzle';
   document.body.classList.add('puzzle');
   resetAll();
@@ -1187,6 +1224,7 @@ function applyHints(){
   lineHints.visible = (S.mode==='puzzle' && S.hintLineart);
 }
 function startView(revealAll){
+  shotExit();
   S.mode='view'; S.running=false;
   document.body.classList.remove('puzzle');
   C.forEach(c=>{ if(!c.placed) placePiece(c,true); });
@@ -1417,6 +1455,7 @@ async function quitNoSave(){        // (1) セーブせずタイトルへ(進行
   el('resumeBtn').style.display='none';
 }
 function goTitle(){
+  shotExit();
   el('viewPanel').style.display='none';
   el('hud-top').style.display='none';
   el('trayWrap').style.display='none';
@@ -1438,6 +1477,54 @@ el('pauseChip').addEventListener('click',pauseGame);
 el('resumeGameBtn').addEventListener('click',resumeGame);
 el('quitBtn').addEventListener('click',quitToTitle);
 el('quitNoSaveBtn').addEventListener('click',quitNoSave);
+
+/* ---------- スクリーンショットモード ----------
+   UIを隠して撮影しやすくする。誤操作対策として
+   ・入った直後に戻し方トーストを表示(数秒で消える)
+   ・右上にごく薄い解除チップが残る(タップで即復帰、撮影時は隅なので切り取りやすい)
+   ・Hキー / Esc でも解除
+   ・パズル中はタイマーを自動停止するので記録にも無害 */
+const SHOT={on:false, pausedTimer:false, t1:null, t2:null, t3:null};
+function shotEnter(){
+  if(SHOT.on) return;
+  if(S.mode!=='puzzle' && S.mode!=='view') return;
+  if(el('pauseOverlay').style.display==='flex') return;
+  SHOT.on=true;
+  document.body.classList.add('shotmode');
+  el('hintPanel').style.display='none';
+  if(S.mode==='puzzle' && S.running){
+    S.running=false; window.__shotAt=performance.now(); SHOT.pausedTimer=true;
+  }
+  const toast=el('shotToast');
+  toast.textContent=T(SHOT.pausedTimer?'shotMsgPz':'shotMsg');
+  toast.style.display='block'; toast.style.opacity=1;
+  clearTimeout(SHOT.t1); clearTimeout(SHOT.t2); clearTimeout(SHOT.t3);
+  SHOT.t1=setTimeout(()=>{ toast.style.opacity=0;
+    SHOT.t3=setTimeout(()=>{ if(SHOT.on) toast.style.display='none'; },800); },3800);
+  const chip=el('shotChip');
+  chip.textContent=T('shotExit');
+  chip.style.display='block'; chip.classList.remove('dim');
+  SHOT.t2=setTimeout(()=>{ chip.classList.add('dim'); chip.textContent='📷'; },4200);
+}
+function shotExit(){
+  if(!SHOT.on) return;
+  SHOT.on=false;
+  clearTimeout(SHOT.t1); clearTimeout(SHOT.t2); clearTimeout(SHOT.t3);
+  document.body.classList.remove('shotmode');
+  el('shotChip').style.display='none';
+  el('shotToast').style.display='none';
+  if(SHOT.pausedTimer){
+    SHOT.pausedTimer=false;
+    if(S.mode==='puzzle'){ S.startAt += performance.now()-window.__shotAt; S.running=true; }
+  }
+}
+el('shotBtnGame').addEventListener('click',shotEnter);
+el('shotBtnView').addEventListener('click',shotEnter);
+el('shotChip').addEventListener('click',shotExit);
+addEventListener('keydown',e=>{
+  if(e.key==='h'||e.key==='H'){ SHOT.on?shotExit():shotEnter(); }
+  else if(e.key==='Escape'&&SHOT.on) shotExit();
+});
 
 /* ---------- 星座あてクイズ ---------- */
 const QZ={hint:true, N:10, qs:[], idx:0, score:0, t0:0, wrongThis:false, locked:false};
@@ -1637,7 +1724,7 @@ function skyUp(e){
   if(pointers.size<2)pinch=0;
   if(pointers.size===0){
     skyDrag=false;canvas.classList.remove('dragging');
-    if(moved<7 && S.selected && S.mode==='puzzle'){
+    if(moved<7 && S.selected && S.mode==='puzzle' && !SHOT.on){
       attemptPlace(S.selected, dirFromScreen(e.clientX,e.clientY));
     }
   }
